@@ -13,6 +13,7 @@ class ListViewController: UITableViewController {
     @IBOutlet weak var searchBtn: UIBarButtonItem!
     @IBOutlet weak var titleLabel: UIBarButtonItem!
     var searchBegin = false
+    var searchViewOpen = false
     var listItems = [ListItem]()
     var listItemsfilterd = [ListItem]()
     var timer = Timer()
@@ -27,7 +28,7 @@ class ListViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return searchBegin ? listItemsfilterd.count :  listItems.count
+        return searchBegin ? listItemsfilterd.count : listItems.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -38,7 +39,7 @@ class ListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if(indexPath.row == listItems.count - 1){
+        if(indexPath.row == listItems.count - 1 && searchView.text!.isEmpty){
             cell.transform = CGAffineTransform(scaleX: 0.2, y: 0.2)
             UIView.animate(withDuration: 0.6) {
                 cell.transform = CGAffineTransform.identity
@@ -61,7 +62,8 @@ class ListViewController: UITableViewController {
             if let item  = listItem {
                 listItems.append(item)
                 self.tableView.reloadData()
-                if(!searchBegin){
+                filterArry(value: searchView.text!)
+                if(searchView.text!.isEmpty){
                     scrollToBottom()
                     titleLabel.title = item.name
                 }
@@ -70,19 +72,29 @@ class ListViewController: UITableViewController {
     }
     
     @IBAction func searchDidPress(_ sender: UIBarButtonItem) {
-        searchBegin = !searchBegin
-        searchBtn.image = searchBegin ? UIImage(named: "icons8-x") : UIImage(named: "icons8-search")
-        searchView.alpha = searchBegin ? 1 : 0
-        titleLabel.title = ""
+        searchViewOpen = !searchViewOpen
+        searchBtn.image = searchViewOpen ? UIImage(named: "icons8-x") : UIImage(named: "icons8-search")
+        searchView.alpha = searchViewOpen ? 1 : 0
         self.tableView.reloadData()
+        searchView.text = ""
         
     }
     
-    @IBAction func searchBegin(_ sender: UITextField) {
+    func filterArry(value: String){
         listItemsfilterd = listItems.filter { word in
-            return word.name.localizedCaseInsensitiveContains(sender.text ?? "")
+            if(value.isEmpty){
+               return true
+            }else{
+               return word.name.localizedCaseInsensitiveContains(value)
+            }
         }
         self.tableView.reloadData()
+    }
+    
+    @IBAction func searchBegin(_ sender: UITextField) {
+        searchBegin = !sender.text!.isEmpty
+        titleLabel.title = ""
+        filterArry(value: sender.text!)
     }
     
     func scrollToBottom(){
