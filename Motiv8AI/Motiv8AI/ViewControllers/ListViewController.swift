@@ -74,12 +74,15 @@ class ListViewController: UITableViewController {
         searchBtn.image = searchBegin ? UIImage(named: "icons8-x") : UIImage(named: "icons8-search")
         searchView.alpha = searchBegin ? 1 : 0
         titleLabel.title = ""
+        self.tableView.reloadData()
+        
     }
     
     @IBAction func searchBegin(_ sender: UITextField) {
         listItemsfilterd = listItems.filter { word in
             return word.name.localizedCaseInsensitiveContains(sender.text ?? "")
-        } //
+        }
+        self.tableView.reloadData()
     }
     
     func scrollToBottom(){
